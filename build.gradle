@@ -27,6 +27,16 @@ sourceSets.main.resources {
 }
 
 repositories {
+    // maven.neoforged.net (added first by the NeoForge plugin) answers 502 for artifacts it does not host,
+    // which aborts the resolution: force these groups to come from BlameJared only.
+    exclusiveContent {
+        forRepository { maven { url 'https://maven.blamejared.com' } }
+        filter {
+            includeGroup 'com.hollingsworth.ars_nouveau'
+            includeGroup 'com.hollingsworth.nuggets'
+            includeGroup 'mezz.jei'
+        }
+    }
     maven { url 'https://maven.blamejared.com' }
     maven {
         name = 'GeckoLib'
@@ -131,11 +141,11 @@ configurations {
 
 dependencies {
     // Ars Nouveau
-    implementation "com.hollingsworth.ars_nouveau:ars_nouveau-1.21.1:5.11.5.1335"
+    implementation "com.hollingsworth.ars_nouveau:ars_nouveau-${mc_version}:${ars_version}"
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
-    // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
-    // compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
+    compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+    compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
     // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
     // localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
 

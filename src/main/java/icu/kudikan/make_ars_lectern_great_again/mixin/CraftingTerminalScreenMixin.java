@@ -3,6 +3,7 @@ package icu.kudikan.make_ars_lectern_great_again.mixin;
 import com.hollingsworth.arsnouveau.client.container.AbstractStorageTerminalScreen;
 import com.hollingsworth.arsnouveau.client.container.CraftingTerminalMenu;
 import com.hollingsworth.arsnouveau.client.container.CraftingTerminalScreen;
+import icu.kudikan.make_ars_lectern_great_again.utils.ClientLayout;
 import icu.kudikan.make_ars_lectern_great_again.utils.Constants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -23,7 +24,7 @@ public abstract class CraftingTerminalScreenMixin extends AbstractStorageTermina
     @Inject(method = "init()V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/recipebook/RecipeBookComponent;init(IILnet/minecraft/client/Minecraft;ZLnet/minecraft/world/inventory/RecipeBookMenu;)V"))
     public void init(CallbackInfo ci) {
-        this.topPos += (Constants.ROW_COUNT - 3) * 9;
+        this.topPos += Constants.extraRows() * 9;
     }
 
     @ModifyConstant(method = "init()V",
@@ -34,9 +35,9 @@ public abstract class CraftingTerminalScreenMixin extends AbstractStorageTermina
             })
     private int init(int value) {
         return switch (value) {
-            case 3 -> Constants.ROW_COUNT; // rowCount
-            case 34 -> value - (Constants.ROW_COUNT - 3) * 9; // - recipeButtonY
-            case 23 -> value + (Constants.ROW_COUNT - 3) * 9; // collapseButtonY
+            case 3 -> Constants.rows(); // rowCount
+            case 34 -> value - Constants.extraRows() * 9; // - recipeButtonY
+            case 23 -> value + Constants.extraRows() * 9; // collapseButtonY
             default -> value;
         };
     }
@@ -45,7 +46,7 @@ public abstract class CraftingTerminalScreenMixin extends AbstractStorageTermina
             at = @At("HEAD")
     )
     private void collapseScreen(CallbackInfo ci) {
-        rowCount = expanded ? Constants.EXPEND_ROW_COUNT : Constants.ROW_COUNT;
+        rowCount = expanded ? Constants.expandedRows() : Constants.rows();
     }
 
     @Inject(method = "expandScreen()V",
@@ -61,7 +62,15 @@ public abstract class CraftingTerminalScreenMixin extends AbstractStorageTermina
             cancellable = true)
     private void hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn, int mouseButton, CallbackInfoReturnable<Boolean> cir) {
         if (cir.getReturnValue()) {
-            cir.setReturnValue(mouseX < guiLeftIn || mouseY < guiTopIn - (Constants.ROW_COUNT - 3) * 18 || mouseX >= guiLeftIn + this.imageWidth || mouseY >= guiTopIn + this.imageHeight);
+            cir.setReturnValue(mouseX < guiLeftIn - Constants.leftShift() || mouseY < guiTopIn - Constants.extraRows() * 18 || mouseX >= guiLeftIn + this.imageWidth + Constants.rightShift() || mouseY >= guiTopIn + this.imageHeight);
+        }
+    }
+
+    // Opening / closing the recipe book changes the available width: rebuild the layout when needed.
+    @Inject(method = "containerTick()V", at = @At("TAIL"))
+    private void containerTick(CallbackInfo ci) {
+        if (ClientLayout.desiredColumns(this, this.imageWidth) != Constants.columns()) {
+            this.rebuildWidgets();
         }
     }
 }

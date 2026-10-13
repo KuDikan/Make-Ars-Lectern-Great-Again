@@ -2,5 +2,15 @@
   "fml.menu.mods.info.description.make_ars_lectern_great_again": "An Ars Nouveau addon that fixes bugs in the Storage Lectern and expands its GUI to make it more convenient to use.",
   "make_ars_lectern_great_again.configuration.disableSearchAutoFocus": "Disable Search Filed Auto Focus",
   "make_ars_lectern_great_again.configuration.disableSearchAutoFocus.tooltip": "Whether to disable search filed auto focus.",
-  "mod.make_ars_lectern_great_again": "Make Ars Lectern Great Again"
+  "mod.make_ars_lectern_great_again": "Make Ars Lectern Great Again",
+  "make_ars_lectern_great_again.configuration.rowCount": "Storage Row Count",
+  "make_ars_lectern_great_again.configuration.rowCount.tooltip": "Number of storage rows. 0 = adapt to the window height.",
+  "make_ars_lectern_great_again.configuration.maxRows": "Max Storage Rows",
+  "make_ars_lectern_great_again.configuration.maxRows.tooltip": "Upper limit for the adaptive row count. 0 = unlimited.",
+  "make_ars_lectern_great_again.configuration.columnCount": "Storage Column Count",
+  "make_ars_lectern_great_again.configuration.columnCount.tooltip": "Number of storage columns. 0 = adapt to the window width.",
+  "make_ars_lectern_great_again.configuration.maxColumns": "Max Storage Columns",
+  "make_ars_lectern_great_again.configuration.maxColumns.tooltip": "Upper limit for the adaptive column count. 0 = unlimited.",
+  "make_ars_lectern_great_again.configuration.sideMargin": "Side Margin",
+  "make_ars_lectern_great_again.configuration.sideMargin.tooltip": "Space (in GUI pixels) kept free on each side of the lectern for JEI when adapting the column count."
 }

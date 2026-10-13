@@ -1,27 +1,55 @@
 package icu.kudikan.make_ars_lectern_great_again.mixin;
 
+import com.hollingsworth.arsnouveau.client.container.SlotStorage;
 import com.hollingsworth.arsnouveau.client.container.StorageTerminalMenu;
+import com.hollingsworth.arsnouveau.common.block.tile.StorageLecternTile;
 import icu.kudikan.make_ars_lectern_great_again.utils.Constants;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.List;
 
 @Mixin(StorageTerminalMenu.class)
 public class StorageTerminalMenuMixin {
+    @Shadow(remap = false)
+    protected StorageLecternTile te;
+    @Shadow(remap = false)
+    protected List<SlotStorage> storageSlotList;
 
-    @ModifyConstant(method = "addStorageSlots(Z)V",
-            constant = {
-                    @Constant(intValue = 3, ordinal = 0),
-                    @Constant(intValue = 3, ordinal = 1),
-                    @Constant(intValue = 21, ordinal = 0),
-                    @Constant(intValue = 7, ordinal = 0)
-            })
-    public int addStorageSlots(int original) {
-        return switch (original) {
-            case 3 -> Constants.ROW_COUNT;
-            case 7 -> Constants.EXPEND_ROW_COUNT;
-            case 21 -> 21 - (Constants.ROW_COUNT - 3) * 18; // Slot y Pos
-            default -> original;
-        };
+    // Replaces the vanilla layout: the row / column count may change at runtime (window resize),
+    // so slots are created on demand and repositioned on every call.
+    @Inject(method = "addStorageSlots(Z)V", at = @At("HEAD"), cancellable = true, remap = false)
+    public void addStorageSlots(boolean expanded, CallbackInfo ci) {
+        int rows = Constants.rows();
+        int columns = Constants.columns();
+        int lines = Constants.expandedRows();
+        int left = 13 - Constants.leftShift(); // Slot x Pos
+        int top = 21 - Constants.extraRows() * Constants.ROW_HEIGHT; // Slot y Pos
+        for (int i = 0; i < lines; i++) {
+            for (int j = 0; j < columns; j++) {
+                int index = i * columns + j;
+                int x = left + j * Constants.SLOT_SIZE;
+                int y = top + i * Constants.ROW_HEIGHT;
+                boolean show = expanded || i < rows;
+                if (index < storageSlotList.size()) {
+                    SlotStorage slot = storageSlotList.get(index);
+                    slot.xDisplayPosition = x;
+                    slot.yDisplayPosition = y;
+                    slot.show = show;
+                } else {
+                    storageSlotList.add(new SlotStorage(te, index, x, y, show));
+                }
+            }
+        }
+        // Slots left over from a previous, bigger layout
+        for (int index = lines * columns; index < storageSlotList.size(); index++) {
+            SlotStorage slot = storageSlotList.get(index);
+            slot.show = false;
+            slot.setStack(null);
+        }
+        ci.cancel();
     }
 }
